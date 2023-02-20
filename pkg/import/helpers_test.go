@@ -187,7 +187,7 @@ func testCredHelper(t *testing.T, when spec.G, it spec.S) {
 			require.NoError(t, os.Setenv(envVarRegistryPassword+"_10", ""))
 		})
 
-		it("returns credentials for env vars REGISTRY_URL_N where N is an integer >= 0 and <= 9", func() {
+		it("returns credentials for environment vars REGISTRY_URL_N where N is an integer >= 0 and <= 9", func() {
 			credHelper = importpkg.NewCredHelperFromEnvVars(envVarRegistryUrl, envVarRegistryUser, envVarRegistryPassword)
 			require.Equal(t, len(credHelper.Auths), 10)
 			registryUser, registryPassword, err := credHelper.Get(os.Getenv(envVarRegistryUrl + "_0"))
