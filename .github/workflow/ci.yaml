@@ -1,18 +1,21 @@
-name: Test and coverage
+name: CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+    - main
+    - 251-support-env-vars-for-registry-auth-when-executing-kp-import
+  pull_request: {}
 
 jobs:
-  build:
+
+  test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-        with:
-          fetch-depth: 2
-      - uses: actions/setup-go@v2
-        with:
-          go-version: '1.18'
-      - name: Run coverage
-        run: go test -race -coverprofile=coverage.txt -covermode=atomic ./...
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
+    - uses: actions/checkout@v1
+    - name: Run tests
+      uses: ./.github/actions/run-tests
+    - name: Report coverage
+      run: bash <(curl -s https://codecov.io/bash)
+      env:
+        CODECOV_TOKEN: b9667068-6fac-4787-8c05-d0b5d65f5adb
