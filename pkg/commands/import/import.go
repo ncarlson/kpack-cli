@@ -42,6 +42,9 @@ func NewImportCommand(
 	const (
 		confirmMessage          = "Confirm with y:"
 		noChangesConfirmMessage = "Re-upload images with y:"
+		envVarRegistryUrl       = "REGISTRY_URL"
+		envVarRegistryUser      = "REGISTRY_USER"
+		envVarRegistryPassword  = "REGISTRY_PASSWORD"
 	)
 
 	confirmMsgMap := map[bool]string{
@@ -98,8 +101,14 @@ cat dependencies.yaml | kp import -f -`,
 			}
 
 			defaultKeychain := authn.DefaultKeychain
+			kc := authn.NewMultiKeychain(
+				authn.NewKeychainFromHelper(
+					importpkg.NewCredHelperFromEnvVars(envVarRegistryUrl, envVarRegistryUser, envVarRegistryPassword)),
+				defaultKeychain,
+			)
+
 			if showChanges {
-				hasChanges, summary, err := importpkg.SummarizeChange(ctx, defaultKeychain, descriptor, kpConfig, importpkg.NewDefaultRelocatedImageProvider(imgFetcher), differ, cs)
+				hasChanges, summary, err := importpkg.SummarizeChange(ctx, kc, descriptor, kpConfig, importpkg.NewDefaultRelocatedImageProvider(imgFetcher), differ, cs)
 				if err != nil {
 					return err
 				}
@@ -125,7 +134,7 @@ cat dependencies.yaml | kp import -f -`,
 			if ch.IsDryRun() {
 				objs, err = importer.ImportDescriptorDryRun(
 					ctx,
-					authn.DefaultKeychain,
+					kc,
 					kpConfig,
 					rawDescriptor,
 				)
@@ -135,7 +144,7 @@ cat dependencies.yaml | kp import -f -`,
 			} else {
 				objs, err = importer.ImportDescriptor(
 					ctx,
-					authn.DefaultKeychain,
+					kc,
 					kpConfig,
 					rawDescriptor,
 				)
